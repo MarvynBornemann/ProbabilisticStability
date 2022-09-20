@@ -194,6 +194,7 @@ function basin_stability_fixpoint(
     solver = nothing,
     verbose = false,
     return_df = false,
+    timespan = (0., 1000.),
 )
     sample_size = last(size(ics))
     
@@ -220,7 +221,7 @@ function basin_stability_fixpoint(
         ([cl; di; co; sol.retcode], false)
     end
 
-    ode_prob = ODEProblem(rhs(pg), fixpoint, (0., 1000.))
+    ode_prob = ODEProblem(rhs(pg), fixpoint, timespan)
 
     # TODO: pass solve args through
     esol = mc_sample_from_IC(
