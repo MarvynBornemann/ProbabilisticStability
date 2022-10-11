@@ -3,10 +3,7 @@ function get_convergence_to_state(sol::AbstractODESolution, state, distance; tai
     idx = max(1, round(Int, tail_frac*L)):L
     x = sol.t[idx]
     y = [distance(state, p) for p in sol.u[idx]]
-    X = zeros(length(x),2)
-    X[:,1] = x
-    X[:,2] .= 1.0
-    slope, intercept = X \ log.(y)
+    slope = x \ log.(y)
     return slope
 end
 
