@@ -126,3 +126,51 @@ function all_evals(sol, i) # output_func
     )
     ([a; b; c], false)
 end
+
+
+"""
+    limiting_curve(t_range)
+
+Calculates a time series for a "low voltage fault-ride through limiting curve" based on the one given in:
+"Probabilistic Stability Assessment for Active Distribution Grids" 
+https://arxiv.org/abs/2106.09624
+"""
+function limiting_curve(t_range)
+    slope = 0.7 / 2.85
+    intercept = 0.15 * (1 - slope)
+
+    limiting_curve = zeros(length(t_range))
+    for i in 1:length(t_range)
+        t = t_range[i]
+        if t <= 0.15
+            limiting_curve[i] = 0.15
+        elseif t > 0.15 && t <= 3.0
+            limiting_curve[i] = slope * t + intercept
+        elseif t > 3.0 && t < 60.0
+            limiting_curve[i] = 0.85
+        elseif t >= 60.0
+            limiting_curve[i] = 0.95
+        end
+    end
+    return limiting_curve
+end
+
+function voltage_condition_surv(pg::PowerGrid, sol::AbstractODESolution)
+    limiting_curve_vol = limiting_curve(sol.t) # Generate limiting curve for this time series
+    low_voltage_condition = Vector{Bool}(undef, length(pg.nodes))
+
+    my_sol = PowerGridSolution(sol, pg)
+    for n in 1:length(pg.nodes) # check all nodes
+        v_node = []
+        for t in sol.t
+            push!(v_node, my_sol(t, n, :v))
+        end
+        under_vol = findall(v_node .< limiting_curve_vol)
+        if under_vol != Int64[]
+            low_voltage_condition[n] = false # Condition is violated if a voltage is lower than in limiting curve
+        else 
+            low_voltage_condition[n] = true
+        end
+    end
+    return all(low_voltage_condition) # Check if low voltage condition is not violated for all nodes
+end

@@ -325,4 +325,79 @@ function survivability(
     return sample_statistics(surv)
 end
 
+
+# PowerGrid
+function survivability(
+    pg::PowerGrid,
+    fixpoint,
+    ics;
+    distance = Euclidean(),
+    threshold = 1E-4,
+    parallel_alg = nothing,
+    solver = nothing,
+    verbose = false,
+    return_df = false,
+    timespan = (0., 1000.),
+)
+    sample_size = last(size(ics))
+    
+    # (sol,i) -> (sol,false)
+    function eval_func(sol, i) # output_func
+        co = eval_convergence_to_state(
+            sol,
+            fixpoint,
+            distance;
+            verbose = false,
+        )
+        di = get_final_distance_to_state(
+            sol,
+            fixpoint,
+            distance; # per dimension, use state_filter?
+            threshold = threshold,
+            verbose = false,
+        )
+        cl = eval_final_distance_to_state(
+            di;
+            threshold = threshold,
+            verbose = false,
+        )
+        su = voltage_condition_surv(pg, sol)
+        return ([su; cl; di; co; sol.retcode], false)
+    end
+
+    ode_prob = ODEProblem(rhs(pg), fixpoint, timespan)
+
+    # TODO: pass solve args through
+    esol = mc_sample_from_IC(
+        ode_prob,
+        eval_func,
+        sample_size,
+        ics;
+        distance = distance,
+        threshold = threshold,
+        parallel_alg = parallel_alg,
+        solver = solver,
+        verbose = verbose,
+        )
+
+    results = DataFrame(
+        total_survival = [p[1] == 1 for p in esol.u],
+        within_threshold = [p[2] == 1 for p in esol.u],
+        final_distance = [p[3] for p in esol.u],
+        convergence = [p[4] == 1 for p in esol.u],
+        perturbation = [ics.perturbations[:, i] for i in 1:sample_size],
+        retcode = [p[5] for p in esol.u],
+    )
+
+    if verbose
+        println(count(results.within_threshold .== 1), " initial conditions arrived close to the fixpoint (threshold $threshold). ", count(results.convergence .== 1), " indicate convergence. ", count(results.total_survival .== 1), " initial conditions survived.")
+    end
+
+    if return_df 
+        return sample_statistics(results.within_threshold), sample_statistics(results.total_survival), results 
+    else
+        return sample_statistics(results.within_threshold), sample_statistics(results.total_survival)
+    end
+end
+
 # TODO common sampling
