@@ -33,7 +33,7 @@ export get_max_distance_to_state,
 
 using DynamicalSystems:
     DynamicalSystem, parallel_integrator, SVector, trajectory, step!, get_state
-using PowerDynamics: PowerGrid, rhs, symbolsof, dimension
+using PowerDynamics: PowerGrid, rhs, symbolsof, dimension, PowerGridSolution
 using DiffEqCallbacks: TerminateSteadyState
 using OrdinaryDiffEq:
     EnsembleProblem,
