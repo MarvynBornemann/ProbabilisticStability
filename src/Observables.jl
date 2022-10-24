@@ -162,11 +162,15 @@ function voltage_condition_surv(pg::PowerGrid, sol::AbstractODESolution)
     limiting_curve_vol = limiting_curve(sol.t) # Generate limiting curve for this time series
     low_voltage_condition = Vector{Bool}(undef, length(pg.nodes))
 
-    my_sol = PowerGridSolution(sol, pg)
+    #my_sol = PowerGridSolution(sol, pg)
+    my_sol = [State(pg, u) for u in sol.u]
     for n in 1:length(pg.nodes) # check all nodes
         v_node = []
-        for t in sol.t
-            push!(v_node, my_sol(t, n, :v))
+        # for t in sol.t
+        #     push!(v_node, my_sol(t, n, :v))
+        # end
+        for i in 1:length(sol.t)
+            push!(v_node, my_sol[i](n, :v))
         end
         under_vol = findall(v_node .< limiting_curve_vol)
         if under_vol != Int64[]

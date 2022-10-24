@@ -17,7 +17,7 @@ export ICset
 using Distributions: mean
 using Distances: euclidean, Euclidean, PeriodicEuclidean, colwise, evaluate
 using DiffEqBase: AbstractODESolution
-using PowerDynamics: PowerGrid, PowerGridSolution
+using PowerDynamics: PowerGrid, PowerGridSolution, State
 include(folder * "/Observables.jl")
 export get_max_distance_to_state,
     get_max_distances_to_state,
