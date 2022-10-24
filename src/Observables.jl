@@ -170,7 +170,7 @@ function voltage_condition_surv(pg::PowerGrid, sol::AbstractODESolution)
         #     push!(v_node, my_sol(t, n, :v))
         # end
         for i in 1:length(sol.t)
-            push!(v_node, my_sol[i](n, :v))
+            push!(v_node, my_sol[i][n, :v])
         end
         under_vol = findall(v_node .< limiting_curve_vol)
         if under_vol != Int64[]
