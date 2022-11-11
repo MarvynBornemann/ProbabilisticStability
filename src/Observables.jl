@@ -181,3 +181,18 @@ function voltage_condition_surv(pg::PowerGrid, sol::AbstractODESolution)
     end
     return all(low_voltage_condition) # Check if low voltage condition is not violated for all nodes
 end
+
+backward_diff(x::Array, y::Array) = (y[2] - y[1])/(x[2] - x[1])
+
+function eval_final_frequency(pg::PowerGrid, sol; threshold=0.18)
+    N = length(pg.nodes)
+    f = zeros(N)
+    t_last2 = sol.t[end-1:end]
+    state_last2 = [State(pg, u) for u in sol.u[end-1:end]]
+    for n in 1:N # check all nodes
+        φ_last2 = [state[n, :φ] for state in state_last2] #[rad]
+        ω = backward_diff(t_last2, φ_last2) #[rad/s]
+        f[n] = ω /(2π) #[Hz]
+    end
+    return all(abs.(f) .< threshold) #allowed change in frequency is +/- 180mHz
+end

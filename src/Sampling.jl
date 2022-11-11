@@ -361,8 +361,13 @@ function survivability(
             threshold = threshold,
             verbose = false,
         )
+        fr = eval_final_frequency(
+            pg, 
+            sol; 
+            threshold = 0.18, #allowed change in frequency is +/- 180mHz
+        )
         su = voltage_condition_surv(pg, sol)
-        return ([su; cl; di; co; sol.retcode], false)
+        return ([su; cl; di; co; fr; sol.retcode], false)
     end
 
     ode_prob = ODEProblem(rhs(pg), fixpoint, timespan)
@@ -385,8 +390,9 @@ function survivability(
         within_threshold = [p[2] == 1 for p in esol.u],
         final_distance = [p[3] for p in esol.u],
         convergence = [p[4] == 1 for p in esol.u],
+        final_frequency_within_threshold = [p[5] == 1 for p in esol.u],
         perturbation = [ics.perturbations[:, i] for i in 1:sample_size],
-        retcode = [p[5] for p in esol.u],
+        retcode = [p[6] for p in esol.u],
     )
 
     if verbose
