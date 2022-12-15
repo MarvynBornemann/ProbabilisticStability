@@ -159,6 +159,11 @@ function limiting_curve(t_range)
 end
 
 function voltage_condition_surv(pg::PowerGrid, sol::AbstractODESolution)
+    #catch case, where sol.t has less than 2 values
+    if(length(sol.t) < 2)
+        return false
+    end
+
     limiting_curve_vol = limiting_curve(sol.t) # Generate limiting curve for this time series
     low_voltage_condition = Vector{Bool}(undef, length(pg.nodes))
 
@@ -187,6 +192,7 @@ function eval_final_frequency(pg::PowerGrid, sol; threshold=0.18)
     if(length(sol.t) < 2)
         return false
     end
+
     N = length(pg.nodes)
     f = zeros(N)
     t_last2 = sol.t[end-1:end]
