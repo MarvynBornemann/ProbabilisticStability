@@ -48,8 +48,8 @@ using OrdinaryDiffEq:
     solve,
     EnsembleThreads,
     EnsembleSerial,
-    remake,
-    successful_retcode
+    remake
+using SciMLBase: successful_retcode
 using Distributed: nprocs
 using DataFrames: DataFrame, rename!
 include(folder * "/Sampling.jl")
