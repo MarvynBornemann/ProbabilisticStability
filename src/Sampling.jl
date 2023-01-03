@@ -343,31 +343,42 @@ function survivability(
     
     # (sol,i) -> (sol,false)
     function eval_func(sol, i) # output_func
-        co = eval_convergence_to_state(
-            sol,
-            fixpoint,
-            distance;
-            verbose = false,
-        )
-        di = get_final_distance_to_state(
-            sol,
-            fixpoint,
-            distance; # per dimension, use state_filter?
-            threshold = threshold,
-            verbose = false,
-        )
-        cl = eval_final_distance_to_state(
-            di;
-            threshold = threshold,
-            verbose = false,
-        )
-        fr = eval_final_frequency(
-            pg, 
-            sol; 
-            threshold = 0.18, #allowed change in frequency is +/- 180mHz
-        )
-        su = voltage_condition_surv(pg, sol)
-        return ([su; cl; di; co; fr; sol.retcode], false)
+        if(check_returnCodes(sol))
+            co = eval_convergence_to_state(
+                sol,
+                fixpoint,
+                distance;
+                verbose = false,
+            )
+            di = get_final_distance_to_state(
+                sol,
+                fixpoint,
+                distance; # per dimension, use state_filter?
+                threshold = threshold,
+                verbose = false,
+            )
+            cl = eval_final_distance_to_state(
+                di;
+                threshold = threshold,
+                verbose = false,
+            )
+            fr = eval_final_frequency(
+                pg, 
+                sol; 
+                threshold = 0.18, #allowed change in frequency is +/- 180mHz
+            )
+            su = voltage_condition_surv(pg, sol)
+            return ([su; cl; di; co; fr; sol.retcode], false)
+        else
+            di = get_final_distance_to_state(
+                sol,
+                fixpoint,
+                distance; # per dimension, use state_filter?
+                threshold = threshold,
+                verbose = false,
+            )
+            return ([false; false; di; false; false; sol.retcode], false)
+        end
     end
 
     ode_prob = ODEProblem(rhs(pg), fixpoint, timespan)

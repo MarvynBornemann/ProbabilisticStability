@@ -206,3 +206,11 @@ function eval_final_frequency(pg::PowerGrid, sol; threshold=0.18)
     end
     return all(abs.(f) .< threshold) #allowed change in frequency is +/- 180mHz
 end
+
+function check_returnCodes(sol)
+    if(sol.retcode == ReturnCode.Success .|| sol.retcode == ReturnCode.Terminated)
+        return true
+    else
+        return false
+    end
+end
