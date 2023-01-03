@@ -343,7 +343,7 @@ function survivability(
     
     # (sol,i) -> (sol,false)
     function eval_func(sol, i) # output_func
-        if(check_returnCodes(sol))
+        if(successful_retcode(sol.retcode))
             co = eval_convergence_to_state(
                 sol,
                 fixpoint,
