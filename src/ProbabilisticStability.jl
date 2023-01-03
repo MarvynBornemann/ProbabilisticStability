@@ -17,6 +17,7 @@ export ICset
 using Distributions: mean
 using Distances: euclidean, Euclidean, PeriodicEuclidean, colwise, evaluate
 using DiffEqBase: AbstractODESolution
+using SciML.ReturnCode
 using PowerDynamics: PowerGrid, PowerGridSolution, State
 include(folder * "/Observables.jl")
 export get_max_distance_to_state,
@@ -30,7 +31,11 @@ export get_max_distance_to_state,
     eval_max_distance_to_state,
     eval_max_distances_to_state,
     eval_mean_distance_to_state,
-    eval_trajectory_within_bounds
+    eval_trajectory_within_bounds,
+    limiting_curve,
+    voltage_condition_surv,
+    eval_final_frequency,
+    check_returnCodes
 
 using DynamicalSystems:
     DynamicalSystem, parallel_integrator, SVector, trajectory, step!, get_state

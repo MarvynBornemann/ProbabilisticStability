@@ -187,7 +187,7 @@ function voltage_condition_surv(pg::PowerGrid, sol::AbstractODESolution)
     return all(low_voltage_condition) # Check if low voltage condition is not violated for all nodes
 end
 
-function eval_final_frequency(pg::PowerGrid, sol; threshold=0.18)
+function eval_final_frequency(pg::PowerGrid, sol::AbstractODESolution; threshold=0.18)
     #catch case, where sol.t has less than 2 values
     if(length(sol.t) < 2)
         return false
@@ -207,7 +207,7 @@ function eval_final_frequency(pg::PowerGrid, sol; threshold=0.18)
     return all(abs.(f) .< threshold) #allowed change in frequency is +/- 180mHz
 end
 
-function check_returnCodes(sol)
+function check_returnCodes(sol::AbstractODESolution)
     if(sol.retcode == ReturnCode.Success .|| sol.retcode == ReturnCode.Terminated)
         return true
     else
