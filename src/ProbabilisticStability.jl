@@ -16,7 +16,7 @@ export ICset
 
 using Distributions: mean
 using Distances: euclidean, Euclidean, PeriodicEuclidean, colwise, evaluate
-using DiffEqBase: AbstractODESolution, successful_retcode
+using DiffEqBase: AbstractODESolution
 using PowerDynamics: PowerGrid, PowerGridSolution, State
 include(folder * "/Observables.jl")
 export get_max_distance_to_state,
@@ -48,7 +48,8 @@ using OrdinaryDiffEq:
     solve,
     EnsembleThreads,
     EnsembleSerial,
-    remake
+    remake,
+    successful_retcode
 using Distributed: nprocs
 using DataFrames: DataFrame, rename!
 include(folder * "/Sampling.jl")
