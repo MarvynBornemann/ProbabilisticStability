@@ -166,6 +166,7 @@ function voltage_condition_surv(pg::PowerGrid, sol::AbstractODESolution)
 
     limiting_curve_vol = limiting_curve(sol.t) # Generate limiting curve for this time series
     low_voltage_condition = Vector{Bool}(undef, length(pg.nodes))
+    over_voltage_condition = Vector{Bool}(undef, length(pg.nodes))
 
     #my_sol = PowerGridSolution(sol, pg)
     my_sol = [State(pg, u) for u in sol.u]
@@ -183,8 +184,15 @@ function voltage_condition_surv(pg::PowerGrid, sol::AbstractODESolution)
         else 
             low_voltage_condition[n] = true
         end
+
+        over_vol = findall(v_node .> 1.1) # Over voltage condition is 1.1 pu (see https://eepublicdownloads.entsoe.eu/clean-documents/pre2015/consultations/Network_Code_RfG/120626_-_NC_RfG_-_Requirements_in_the_context_of_present_practices.pdf)
+        if over_vol != Int64[]
+            over_voltage_condition[n] = false # Condition is violated if a voltage is higher than 1.1 pu
+        else 
+            over_voltage_condition[n] = true
+        end
     end
-    return all(low_voltage_condition) # Check if low voltage condition is not violated for all nodes
+    return all(low_voltage_condition .&& over_voltage_condition) # Check if low and over voltage condition is not violated for all nodes
 end
 
 function eval_final_frequency(pg::PowerGrid, sol::AbstractODESolution; threshold=0.18)
